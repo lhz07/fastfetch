@@ -1,4 +1,5 @@
 #include "displayserver.h"
+#include "common/thread.h"
 
 FFDisplayResult* ffdsAppendDisplay(
     FFDisplayServerResult* result,
@@ -52,7 +53,7 @@ FFDisplayResult* ffdsAppendDisplay(
 
 void ffConnectDisplayServerImpl(FFDisplayServerResult* ds);
 
-const FFDisplayServerResult* ffConnectDisplayServer()
+static inline const FFDisplayServerResult* ffConnectDisplayServerWrap()
 {
     static FFDisplayServerResult result;
     if (result.displays.elementSize == 0)
@@ -66,4 +67,26 @@ const FFDisplayServerResult* ffConnectDisplayServer()
         ffConnectDisplayServerImpl(&result);
     }
     return &result;
+}
+
+static FFThreadType display_thread = NULL;
+
+const FFDisplayServerResult* ffConnectDisplayServer()
+{
+    if (display_thread){
+        ffThreadJoin(display_thread, 0);
+        display_thread = NULL;
+    }
+    return ffConnectDisplayServerWrap();
+}
+
+static void* displayThread()
+{
+    ffConnectDisplayServerWrap();
+    return NULL;
+}
+
+void ffPrepareDisplayServer()
+{
+    display_thread = ffThreadCreate((void*)displayThread, NULL);
 }

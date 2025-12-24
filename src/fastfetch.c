@@ -4,8 +4,10 @@
 #include "common/io/io.h"
 #include "common/jsonconfig.h"
 #include "common/time.h"
+#include "detection/displayserver/displayserver.h"
 #include "detection/version/version.h"
 #include "logo/logo.h"
+#include "modules/packages/packages.h"
 #include "util/stringUtils.h"
 #include "util/mallocHelper.h"
 #include "fastfetch_datatext.h"
@@ -858,6 +860,7 @@ static void writeConfigFile(FFdata* data)
 int main(int argc, char** argv)
 {
     ffInitInstance();
+    ffPrepareDisplayServer();
     atexit(ffDestroyInstance);
 
     //Data stores things only needed for the configuration of fastfetch
